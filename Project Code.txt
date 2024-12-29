@@ -1,0 +1,178 @@
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <iomanip>
+#include <string>
+
+using namespace std;
+
+// Transaction structure
+struct Transaction {
+    string type;   // Deposit or Withdrawal
+    double amount; // Transaction amount
+    double balanceAfter; // Balance after the transaction
+};
+
+// Account structure
+struct Account {
+    string pin;
+    double balance;
+    vector<Transaction> history; // Transaction history
+};
+
+// ATM class
+class ATM {
+private:
+    unordered_map<string, Account> accounts; // Map of account numbers to accounts
+    string currentAccount;                   // Currently logged-in account
+
+public:
+    // Constructor to initialize accounts
+    ATM() {
+        // Adding sample accounts for demonstration
+        accounts["12345"] = {"1234", 1000.0, {}};
+        accounts["67890"] = {"5678", 2000.0, {}};
+    }
+
+    // Login function
+    bool login() {
+        cout << "Welcome to the ATM!" << endl;
+        string accountNumber, pin;
+
+        cout << "Enter your account number: ";
+        cin >> accountNumber;
+
+        // Check if account exists
+        if (accounts.find(accountNumber) != accounts.end()) {
+            cout << "Enter your PIN: ";
+            cin >> pin;
+
+            // Check if PIN matches
+            if (accounts[accountNumber].pin == pin) {
+                currentAccount = accountNumber;
+                cout << "Login successful!" << endl;
+                return true;
+            } else {
+                cout << "Incorrect PIN!" << endl;
+            }
+        } else {
+            cout << "Account not found!" << endl;
+        }
+        return false;
+    }
+
+    // Check balance
+    void checkBalance() {
+        cout << "Your current balance is: $"
+             << fixed << setprecision(2) << accounts[currentAccount].balance << endl;
+    }
+
+    // Deposit money
+    void deposit() {
+        double amount;
+        cout << "Enter amount to deposit: $";
+        cin >> amount;
+
+        if (amount > 0) {
+            accounts[currentAccount].balance += amount;
+
+            // Record the transaction
+            accounts[currentAccount].history.push_back({"Deposit", amount, accounts[currentAccount].balance});
+            cout << "$" << fixed << setprecision(2) << amount << " deposited successfully!" << endl;
+        } else {
+            cout << "Invalid deposit amount!" << endl;
+        }
+    }
+
+    // Withdraw money
+    void withdraw() {
+        double amount;
+        cout << "Enter amount to withdraw: $";
+        cin >> amount;
+
+        if (amount > 0) {
+            if (accounts[currentAccount].balance >= amount) {
+                accounts[currentAccount].balance -= amount;
+
+                // Record the transaction
+                accounts[currentAccount].history.push_back({"Withdrawal", amount, accounts[currentAccount].balance});
+                cout << "$" << fixed << setprecision(2) << amount << " withdrawn successfully!" << endl;
+            } else {
+                cout << "Insufficient balance!" << endl;
+            }
+        } else {
+            cout << "Invalid withdrawal amount!" << endl;
+        }
+    }
+
+    // View transaction history
+    void viewTransactionHistory() {
+        cout << "Transaction History:" << endl;
+        for (const auto &transaction : accounts[currentAccount].history) {
+            cout << transaction.type << ": $" << fixed << setprecision(2) << transaction.amount
+                 << " | Balance after: $" << transaction.balanceAfter << endl;
+        }
+    }
+
+    // Change PIN
+    void changePIN() {
+        string newPin;
+        cout << "Enter your new PIN: ";
+        cin >> newPin;
+
+        accounts[currentAccount].pin = newPin;
+        cout << "PIN changed successfully!" << endl;
+    }
+
+    // Main menu
+    void menu() {
+        int choice;
+        do {
+            cout << "\n=== ATM Menu ===" << endl;
+            cout << "1. Check Balance" << endl;
+            cout << "2. Deposit" << endl;
+            cout << "3. Withdraw" << endl;
+            cout << "4. View Transaction History" << endl;
+            cout << "5. Change PIN" << endl;
+            cout << "6. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    checkBalance();
+                    break;
+                case 2:
+                    deposit();
+                    break;
+                case 3:
+                    withdraw();
+                    break;
+                case 4:
+                    viewTransactionHistory();
+                    break;
+                case 5:
+                    changePIN();
+                    break;
+                case 6:
+                    cout << "Thank you for using the ATM. Goodbye!" << endl;
+                    break;
+                default:
+                    cout << "Invalid choice! Please try again." << endl;
+            }
+        } while (choice != 6);
+    }
+};
+
+// Main function
+int main() {123
+    ATM atm;
+
+    if (atm.login()) {
+        atm.menu();
+    } else {
+        cout << "Login failed. Exiting program." << endl;
+    }
+
+    return 0;
+}
